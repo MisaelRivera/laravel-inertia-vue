@@ -16,8 +16,8 @@ class Sample extends Model
         return $this->belongsTo(Order::class, 'id_orden');
     }
 
-    public function identificacionMuestra ()
-    {
+    public function identificacionMuestraRelacion ()
+    {   
         return $this->hasOne(SampleIdentification::class, 'id', 'id_identificacion_muestra');
     }
 }

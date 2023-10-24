@@ -27,7 +27,7 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
-    $orders =  Order::with(['muestras.identificacionMuestra', 'cliente', 'siralab'])
+    $orders =  Order::with(['muestras.identificacionMuestraRelacion', 'cliente', 'siralab'])
     ->orderBy('fecha_recepcion', 'desc')
     ->orderBy('hora_recepcion', 'desc')
     ->orderBy('cesavedac', 'asc')
