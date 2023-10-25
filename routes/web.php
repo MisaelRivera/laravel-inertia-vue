@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\ProfileController;
 use App\Models\Order;
 use Illuminate\Foundation\Application;
@@ -33,8 +34,22 @@ Route::get('/dashboard', function () {
     ->orderBy('cesavedac', 'asc')
     ->orderBy('folio', 'desc')
     ->paginate(40);
-    return Inertia::render('Dashboard', ['orders' => $orders]);
+    $page = request()->query('page') ? request()->query('page'):null;
+    return Inertia::render('Dashboard', [
+        'ordersProp' => $orders,
+        'page' => $page
+    ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::prefix('/orders')->group(function () {
+    Route::post('/toggle-cesavedac', [OrdersController::class, 'toggleCesavedac']);
+    Route::post('/toggle-supervision', [OrdersController::class, 'toggleSupervision']);
+    Route::post('/toggle-hoja-campo', [OrdersController::class, 'toggleHojaCampo']);
+    Route::post('/toggle-cadena-custodia', [OrdersController::class, 'toggleCadenaCustodia']);
+    Route::post('/toggle-croquis', [OrdersController::class, 'toggleCroquis']);
+    Route::post('/toggle-reporte-entregado', [OrdersController::class, 'toggleReporteEntregado']);
+    Route::get('/filter', [OrdersController::class, 'filter']);
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -1,19 +1,13 @@
 <template>
     <Head title="Dashboard" />
-
     <AuthenticatedLayout>
-        <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>
-        </template>
-
-        <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">You're logged in!</div>
-                </div>
-            </div>
-        </div>
-        <div class="w-11/12 mx-auto">
+        <div class="w-11/12 mx-auto mt-3">
+            <h1 class="text-2xl">
+                Ordenes
+                <i class="fas fa-plus text-white bg-300-green rounded-full inline-block py-2 px-2 w-8 h-8"></i>
+            </h1>
+            <IndexFilters 
+                @filtering-by-client="filter"/>
             <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                 <thead class="text-xs text-gray-700 bg-gray-50">
                     <tr>
@@ -65,7 +59,7 @@
                 <tbody>
                     <tr 
                         class="border-b dark:border-gray-700" 
-                        v-for="order in orders.data"
+                        v-for="order in orders"
                         :key="order.id">
                         <td scope="row"
                             class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white">
@@ -78,7 +72,7 @@
                                     </button>
                                 </template> 
                                 <template #content>
-                                    <template v-for="muestra in order.muestras">
+                                    <template v-for="muestra in order.muestras" :key="muestra.id">
                                         <ul class="list-none max-w-full" style="white-space: normal; word-wrap: break-word;">
                                             <li class="px-3 py-1 font-black max-w-full">
                                                 MFQ-{{ order.folio }}-{{ muestra.numero_muestra }}
@@ -121,12 +115,12 @@
                         </td>
                         <td class="px-4 py-3">
                             <template v-if="order.aguas_alimentos === 'Aguas'">
-                                <div class="w-8 h-8 bg-blue-500 rounded-full">
+                                <div class="w-6 h-6 bg-blue-500 rounded-full">
 
                                 </div>
                             </template>
                             <template v-else>
-                                <div class="w-8 h-8 bg-yellow-500 rounded-full">
+                                <div class="w-6 h-6 bg-yellow-500 rounded-full">
 
                                 </div>
                             </template>
@@ -140,44 +134,126 @@
                             {{ order.fecha_recepcion }}
                         </td>
                         <td class="px-4 py-3">
-                            {{ order.hora_recepcion.substr(0, 5) }}
+                            {{ order.hora_recepcion ? order.hora_recepcion.substr(0, 5):'' }}
                         </td>
                         <td class="px-4 py-3">
                             {{ order.cliente.cliente }}
                         </td>
+                        <td class="px-4 py-3">
+                            <CircleSwitch
+                                v-if="order.cesavedac === 1"
+                                :value="order.reporte_cesavedac_entregado"
+                                :key="order.id"
+                                url="/orders/toggle-cesavedac"
+                                :orderId="order.id"/>
+                        </td>
+                        <td class="px-4 py-3">
+                            <CircleSwitch
+                                v-if="order.supervision !== false"
+                                :value="order.supervision"
+                                :key="order.id"
+                                url="/orders/toggle-supervision"
+                                :orderId="order.id"/>
+                        </td>
+                        <td class="px-4 py-3">
+                            <CircleSwitch
+                                v-if="order.siralab"
+                                :value="order.siralab.hoja_campo"
+                                :key="order.id"
+                                url="/orders/toggle-hoja-campo"
+                                :orderId="order.id"/>
+                        </td>
+                        <td class="px-4 py-3">
+                            <CircleSwitch
+                                v-if="order.siralab"
+                                :value="order.siralab.cadena_custodia"
+                                :key="order.id"
+                                url="/orders/toggle-cadena-custodia"
+                                :orderId="order.id"/>
+                        </td>
+                        <td class="px-4 py-3">
+                            <CircleSwitch
+                                v-if="order.siralab"
+                                :value="order.siralab.croquis"
+                                :key="order.id"
+                                url="/orders/toggle-croquis"
+                                :orderId="order.id"/>
+                        </td>
+                        <td class="px-4 py-3">
+                            {{ addDaysWithoutSundays(order.fecha_recepcion, 8) }}
+                        </td>
+                        <td class="px-4 py-3">
+                            {{ addDaysWithoutSundays(order.fecha_recepcion, 10) }}
+                        </td>
+                        <td class="px-4 py-3">
+                            <CircleSwitch
+                                :value="order.reporte_entregado"
+                                :key="order.id"
+                                url="/orders/toggle-reporte-entregado"
+                                :orderId="order.id"/>
+                        </td>
                     </tr>
                 </tbody>
             </table>
+            <div class="flex justify-center mt-8">
+                <Pagination 
+                    :items="ordersProp"
+                    :page="page"/>
+            </div>
         </div>
     </AuthenticatedLayout>
 </template>
 <script>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Dropdown from '@/Components/Dropdown.vue';
+import CircleSwitch from '@/Components/shared/CircleSwitch.vue';
+import Pagination from '@/Components/shared/Pagination.vue';
 import { Head, Link } from '@inertiajs/vue3';
+import { addDaysWithoutSundays } from '@/helpers';
+import IndexFilters from '@/Components/shared/IndexFilters.vue';
 export default {
   components: {
     AuthenticatedLayout,
     Dropdown,
     Head,
-    Link
-  },
+    Pagination,
+    IndexFilters,
+    Link,
+    CircleSwitch
+},
   props: {
-    orders: {
+    ordersProp: {
       required: true,
     },
+    page: {
+        type: String
+    }
   },
-  methods: {
-    printKeys(item, folio) {
-      let values = '';
-      Object.keys(item).forEach((key) => {
-        console.log(`Folio: ${folio}, ${key}: ${item[key]}`);
-        if (item[key] && key == 'identificacion_muestra') {
-          values = item[key];
+
+  mounted() {
+    console.log(this.ordersProp);
+  },
+
+  data () {
+    return {
+        orders: this.ordersProp.data,
+        filters: {
+            client: null,
+            folio: null,
+            cesavedac: false
         }
-      });
-      return values;
+    }
+  },
+
+  methods: {
+    addDaysWithoutSundays (date, days) {
+        return addDaysWithoutSundays(date, days);
     },
+
+    async filter () {
+        const orders = await axios('/orders/filter', this.filters);
+        this.orders = orders.data;
+    }
   },
 };
 </script>
