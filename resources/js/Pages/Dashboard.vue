@@ -2,12 +2,16 @@
     <Head title="Dashboard" />
     <AuthenticatedLayout>
         <div class="w-11/12 mx-auto mt-3">
-            <h1 class="text-2xl">
-                Ordenes
-                <i class="fas fa-plus text-white bg-300-green rounded-full inline-block py-2 px-2 w-8 h-8"></i>
-            </h1>
+            <div class="w-8/12 mx-auto">
+                <Link href="/test">Test</Link>
+                <IndexTitle 
+                     title="Ordenes"
+                     ownLink="/dashboard"
+                     addLink="/orders/create"/>
+            </div>
             <IndexFilters 
-                @filtering-by-client="filter"/>
+                @filtering-by-client="filter"
+                :client-prop="filters.client"/>
             <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                 <thead class="text-xs text-gray-700 bg-gray-50">
                     <tr>
@@ -211,6 +215,7 @@ import Pagination from '@/Components/shared/Pagination.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { addDaysWithoutSundays } from '@/helpers';
 import IndexFilters from '@/Components/shared/IndexFilters.vue';
+import IndexTitle from '@/Components/shared/IndexTitle.vue';
 export default {
   components: {
     AuthenticatedLayout,
@@ -219,7 +224,8 @@ export default {
     Pagination,
     IndexFilters,
     Link,
-    CircleSwitch
+    CircleSwitch,
+    IndexTitle,
 },
   props: {
     ordersProp: {
@@ -231,15 +237,15 @@ export default {
   },
 
   mounted() {
-    console.log(this.ordersProp);
+    
   },
 
   data () {
     return {
         orders: this.ordersProp.data,
         filters: {
-            client: null,
-            folio: null,
+            client: '',
+            folio: '',
             cesavedac: false
         }
     }
@@ -250,9 +256,10 @@ export default {
         return addDaysWithoutSundays(date, days);
     },
 
-    async filter () {
-        const orders = await axios('/orders/filter', this.filters);
-        this.orders = orders.data;
+    async filter (filterType, filterValue) {
+        this.filters[filterType] = filterValue;
+        const orders = await axios.post('/orders/filter', this.filters);
+        this.orders = orders.data.data;
     }
   },
 };

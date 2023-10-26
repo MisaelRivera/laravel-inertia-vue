@@ -7,10 +7,18 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use App\Models\Order;
 use App\Models\Client;
+use Inertia\Inertia;
 
 class OrdersController extends Controller
 {
     //
+
+    public function create () {
+        $data = ['lastOrder' => Order::getOrderWithLastFolio()];
+        $data['aguas'] = $data['lastOrder']->aguas_alimentos === 'Aguas'; 
+        return Inertia::render('orders/CreateOrder', $data);
+    }
+
     public function toggleCesavedac (Request $request) {
        try {
            $request->validate([
@@ -107,8 +115,14 @@ class OrdersController extends Controller
     public function filter (Request $request) 
     {
         $clientes = Client::where('cliente', 'like', "%" . $request->input('client') . "%")->get()->toArray();
-        $ordenes = Order::whereIn('id_cliente', array_column($clientes, 'id'))->get();
-        return $ordenes;
+        $ordenes = Order::whereIn('id_cliente', array_column($clientes, 'id'))
+            ->with(['muestras.identificacionMuestraRelacion', 'cliente', 'siralab'])
+            ->orderBy('fecha_recepcion', 'desc')
+            ->orderBy('hora_recepcion', 'desc')
+            ->orderBy('cesavedac', 'asc')
+            ->orderBy('folio', 'desc')
+            ->paginate(40);
+        return response()->json($ordenes);
     }
 
 }

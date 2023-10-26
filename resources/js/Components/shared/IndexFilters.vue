@@ -1,19 +1,28 @@
 <template>
-    <div class="w-8/12 mx-auto mt-2 bg-slate-400 rounded px-4 py-3">
-        <TextInput 
-            :modelValue="client"
-            @custom="$emit('filteringByClient', 'client', client)"/>
+    <div class="w-8/12 mx-auto my-4 bg-blue-200 rounded px-4 py-3">
+        <div class="w-3/12">
+            <CustomInput 
+                v-model="client"
+                text="Filtro cliente"
+                @custom="$emit('filteringByClient', 'client', client)"/>
+        </div>
     </div>
 </template>
 <script>
-    import TextInput from '@/Components/TextInput.vue';
+    import CustomInput from '@/Components/shared/CustomInput.vue';
     export default {
+        props: {
+            clientProp: {
+                type: String,
+                default: ''
+            }
+        },
         components: {
-            TextInput
+            CustomInput
         },
         data () {
             return {
-                client: null,
+                client: this.clientProp,
             }
         }
     }

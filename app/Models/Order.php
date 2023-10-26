@@ -48,4 +48,12 @@ class Order extends Model
             }
         );
     } 
+
+    public static function getOrderWithLastFolio()
+    {
+        return static::with(['cliente'])
+            ->orderBy('fecha_recepcion', 'desc')
+            ->orderBy('hora_recepcion', 'desc')
+            ->orderBy('folio', 'desc')->first();
+    }
 }

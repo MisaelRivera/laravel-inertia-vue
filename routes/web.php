@@ -41,14 +41,19 @@ Route::get('/dashboard', function () {
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+Route::get('/test', function () {
+    return Inertia::render('test/Test');
+});
+
 Route::prefix('/orders')->group(function () {
+    Route::get('/create', [OrdersController::class, 'create']);
     Route::post('/toggle-cesavedac', [OrdersController::class, 'toggleCesavedac']);
     Route::post('/toggle-supervision', [OrdersController::class, 'toggleSupervision']);
     Route::post('/toggle-hoja-campo', [OrdersController::class, 'toggleHojaCampo']);
     Route::post('/toggle-cadena-custodia', [OrdersController::class, 'toggleCadenaCustodia']);
     Route::post('/toggle-croquis', [OrdersController::class, 'toggleCroquis']);
     Route::post('/toggle-reporte-entregado', [OrdersController::class, 'toggleReporteEntregado']);
-    Route::get('/filter', [OrdersController::class, 'filter']);
+    Route::post('/filter', [OrdersController::class, 'filter']);
 });
 
 Route::middleware('auth')->group(function () {
