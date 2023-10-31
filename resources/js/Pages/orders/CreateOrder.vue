@@ -22,17 +22,16 @@
                         text="Número de muestras"
                         id="numero-muestras"
                         type="number"
-                        v-model="form.numeroMuestras"/>
-                    <CustomSelect 
-                        text="Aguas o alimentos"
-                        :value="form.aguasAlimentos">
-                        <option value="Aguas">Aguas</option>
-                        <option value="Alimentos">Alimentos</option>
-                    </CustomSelect>
+                        v-model="form.numeroMuestras"
+                        :validate="[{required: true, message:'El numero de muestras es requerido'}, {min:5, message: 'El numero de muestras debe ser minimo 5'}]"/>
+                    </div>
+                </form>
+                <div class="card flex justify-content-center">
+                    
                 </div>
-            </form>
         </div>
     </AuthenticatedLayout>
+
 </template>
 
 <script>
@@ -41,6 +40,7 @@
     import CustomInput from '@/Components/shared/CustomInput.vue'; 
     import CustomSelect from '@/Components/shared/CustomSelect.vue'; 
     import CreateTitle from '@/Components/shared/CreateTitle.vue';
+
     export default {
         components: {
             AuthenticatedLayout,
@@ -61,6 +61,10 @@
             },
         },
 
+        methods: {
+
+        },
+
         data () {
             return {
                 form: {
@@ -68,6 +72,7 @@
                     numeroCotizacion: '',
                     numeroMuestras: '',
                     aguasAlimentos: '',
+                    test: '',
                 }
             };
         }
